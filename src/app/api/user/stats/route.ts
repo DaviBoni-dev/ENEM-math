@@ -19,15 +19,14 @@ export async function GET() {
               WHEN COUNT(*) > 0 THEN ROUND((COUNT(*) FILTER (WHERE acertou = TRUE) * 100.0) / COUNT(*), 1)
               ELSE 0 
           END AS taxa
-       FROM historico_respostas
+       FROM historico_respostas 
        WHERE usuario_id = $1`,
       [session.user.id]
     );
 
-    // Retorna os dados exatos: { total: X, acertos: Y, taxa: Z }
     return NextResponse.json(result.rows[0]);
   } catch (error) {
-    console.error("Erro ao buscar stats:", error);
-    return NextResponse.json({ error: "Erro no servidor" }, { status: 500 });
+    console.error("Erro ao buscar estatísticas:", error);
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }

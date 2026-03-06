@@ -1,25 +1,32 @@
 'use client'
 import { Search, Bell, Flame, Star, Clock, Play, BookOpen, Target, Award, Calendar } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useEffect, useState } from "react";
 import Link from 'next/link';
 
 export default function Dashboard() {
-  // 1. Pegamos os dados da sessão ativa
   const { data: session, status } = useSession();
+  const [stats, setStats] = useState({ total: 0, acertos: 0, taxa: 0 });
 
-  // 2. Extraímos o primeiro nome para ficar mais amigável
+  useEffect(() => {
+    if (session) {
+      fetch('/api/user/stats')
+        .then(res => res.json())
+        .then(data => setStats(data))
+        .catch(err => console.error("Erro ao carregar stats", err));
+    }
+  }, [session]);
+
+  const isPro = stats.taxa >= 70;
   const firstName = session?.user?.name ? session.user.name.split(' ')[0] : 'Estudante';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans w-full overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        {/* --- COLUNA PRINCIPAL --- */}
         <div className="lg:col-span-3 space-y-8">
-          
           <div className="flex items-end justify-between">
             <div>
-              {/* 3. Renderização Dinâmica do Nome */}
               <h2 className="text-4xl font-bold mb-2">
                 {status === "loading" ? (
                   <span className="animate-pulse bg-slate-200 h-10 w-48 block rounded-lg"></span>
@@ -27,11 +34,13 @@ export default function Dashboard() {
                   `Bem-vindo de volta, ${firstName}! 👋`
                 )}
               </h2>
-              <p className="text-slate-500">Você já completou 85% das suas metas semanais. Continue assim!</p>
+              <p className="text-slate-500">
+                {isPro ? "Desempenho de craque! Estás no caminho certo." : "Continua a praticar para veres os teus números subirem."}
+              </p>
             </div>
             
             <Link href="/provas/2023">
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-indigo-200 hover:scale-105">
+              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg hover:scale-105">
                 <Play className="w-4 h-4 fill-current" /> Continuar Simulado
               </button>
             </Link>
@@ -39,9 +48,17 @@ export default function Dashboard() {
 
           {/* Grid de Estatísticas Reais */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard icon={<Flame className="text-orange-500"/>} label="DIAS SEGUIDOS" value="12" trend="Recorde pessoal!" />
-            <StatCard icon={<Star className="text-yellow-500"/>} label="PONTOS TOTAL" value="2.450" trend="Top 5% da semana" />
-            <StatCard icon={<Clock className="text-blue-500"/>} label="TEMPO DE FOCO" value="4h 20m" trend="+15% que semana passada" isTrendPositive />
+            <div className={isPro ? "ring-4 ring-amber-400 rounded-3xl transition-all" : ""}>
+              <StatCard 
+                icon={<Target className={isPro ? "text-amber-500" : "text-emerald-500"}/>} 
+                label={isPro ? "PRECISÃO NÍVEL PRO" : "PRECISÃO GERAL"} 
+                value={`${stats.taxa}%`} 
+                trend={`${stats.acertos} acertos`} 
+                isTrendPositive={isPro} 
+              />
+            </div>
+            <StatCard icon={<Award className="text-indigo-500"/>} label="QUESTÕES TOTAL" value={stats.total} trend="No teu histórico" />
+            <StatCard icon={<Flame className="text-orange-500"/>} label="DIAS SEGUIDOS" value="1" trend="Começa a tua sequência!" />
           </div>
 
           {/* Seção de Provas (Praticar) */}
