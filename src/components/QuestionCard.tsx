@@ -15,6 +15,7 @@ interface QuestaoProps {
     resposta_correta: string;
     url_imagem_principal: string | null;
     ano_enem :string;
+    tema: string;
   };
 }
 

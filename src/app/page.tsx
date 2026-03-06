@@ -17,6 +17,16 @@ export default function Dashboard() {
     }
   }, [session]);
 
+  const [topicos, setTopicos] = useState([]);
+
+    useEffect(() => {
+      if (session) {
+        fetch('/api/user/stats-by-topic')
+          .then(res => res.json())
+          .then(data => setTopicos(data));
+      }
+    }, [session]);
+
   const isPro = stats.taxa >= 70;
   const firstName = session?.user?.name ? session.user.name.split(' ')[0] : 'Estudante';
 
@@ -90,29 +100,43 @@ export default function Dashboard() {
           </div>
 
           {/* Seção de Temas (Aprender) */}
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <Target className="text-indigo-600 w-5 h-5" /> Temas para Reforçar
-              </h3>
-              <Link href="/temas" className="text-indigo-600 font-semibold text-sm hover:underline">Ver biblioteca</Link>
+        <div>
+  <div className="flex justify-between items-center mb-6">
+    <h3 className="text-xl font-bold flex items-center gap-2">
+      <Target className="text-indigo-600 w-5 h-5" /> Foco de Estudo
+    </h3>
+  </div>
+  
+  <div className="space-y-4">
+    {topicos.length > 0 ? topicos.map((topico: any) => (
+      <div key={topico.tema} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-200 transition-all">
+         <div className="flex gap-4 items-center">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold ${
+              topico.precisao < 50 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'
+            }`}>
+              {topico.precisao}%
             </div>
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-200 transition-all cursor-pointer">
-               <div className="flex gap-4 items-center">
-                  <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 font-bold">
-                    %
-                  </div>
-                  <div>
-                    <h4 className="font-bold">Porcentagem e Razão</h4>
-                    <p className="text-xs text-slate-400">Você errou 3 questões desse tema ontem.</p>
-                  </div>
-               </div>
-               <Link href="/temas/3" className="bg-slate-100 group-hover:bg-indigo-600 group-hover:text-white p-3 rounded-xl transition-all">
-                  <Play className="w-4 h-4" />
-               </Link>
+            <div>
+              <h4 className="font-bold">{topico.tema}</h4>
+              <p className="text-xs text-slate-400">
+                {topico.acertos} acertos de {topico.total} tentativas
+              </p>
             </div>
-          </div>
-        </div>
+         </div>
+         <div className="text-right">
+            <span className={`text-[10px] font-bold px-2 py-1 rounded-lg uppercase ${
+              topico.precisao < 50 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'
+            }`}>
+              {topico.precisao < 50 ? 'Reforçar' : 'Domínio'}
+            </span>
+         </div>
+      </div>
+    )) : (
+      <p className="text-slate-400 text-sm italic">Resolva mais questões para gerar sua análise por tema.</p>
+    )}
+  </div>
+  </div>
+  </div>
 
         {/* --- SIDEBAR (1/4) --- */}
         <div className="space-y-8">
