@@ -37,6 +37,18 @@ export default function QuestionCard({ questao }: QuestaoProps) {
     }
   };
 
+      // Exemplo da lógica dentro do componente
+    const salvarResposta = async (opcao: string, correta: boolean) => {
+      await fetch('/api/respostas', {
+        method: 'POST',
+        body: JSON.stringify({
+          questaoId: questao.id,
+          opcaoEscolhida: opcao,
+          acertou: correta
+        }),
+      });
+    };
+
   return (
     <section className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden mb-8">
       <div className="p-6">

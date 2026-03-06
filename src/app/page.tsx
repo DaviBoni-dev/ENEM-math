@@ -4,24 +4,32 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 export default function Dashboard() {
+  // 1. Pegamos os dados da sessão ativa
+  const { data: session, status } = useSession();
 
-  const {data: session, status} = useSession();
-  const firstName = session?.user?.name ? session.user.name.split(' ')[0] : 'Estudante'
+  // 2. Extraímos o primeiro nome para ficar mais amigável
+  const firstName = session?.user?.name ? session.user.name.split(' ')[0] : 'Estudante';
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans w-full overflow-x-hidden">
-      {/* --- TOPBAR --- */}
-
-      <div className="max-w-[1400px] mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-[1400px] mx-auto p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        {/* --- COLUNA PRINCIPAL (3/4) --- */}
+        {/* --- COLUNA PRINCIPAL --- */}
         <div className="lg:col-span-3 space-y-8">
           
-          {/* Seção de Boas-vindas */}
           <div className="flex items-end justify-between">
             <div>
-              <h2 className="text-4xl font-bold mb-2">Bem-vindo de volta, {firstName}! 👋</h2>
+              {/* 3. Renderização Dinâmica do Nome */}
+              <h2 className="text-4xl font-bold mb-2">
+                {status === "loading" ? (
+                  <span className="animate-pulse bg-slate-200 h-10 w-48 block rounded-lg"></span>
+                ) : (
+                  `Bem-vindo de volta, ${firstName}! 👋`
+                )}
+              </h2>
               <p className="text-slate-500">Você já completou 85% das suas metas semanais. Continue assim!</p>
             </div>
+            
             <Link href="/provas/2023">
               <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-indigo-200 hover:scale-105">
                 <Play className="w-4 h-4 fill-current" /> Continuar Simulado

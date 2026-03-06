@@ -39,8 +39,7 @@ export default function Navbar() {
             </div>
             <div className="w-10 h-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm overflow-hidden">
               <img 
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user?.name || 'Davi'}`} 
-                alt="Profile" 
+                src={session?.user?.image || "/avatar.jpg"}
               />
             </div>
             
