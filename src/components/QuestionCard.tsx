@@ -30,24 +30,34 @@ export default function QuestionCard({ questao }: QuestaoProps) {
     { label: 'E', text: questao.alternativa_e },
   ];
 
-  const handleClique = (label: string) => {
+  const handleClique = async (label: string) => {
     if (!revelar) {
       setRespostaSelecionada(label);
       setRevelar(true);
+
+      // 2. Calculamos o acerto na hora
+      const acertou = label === questao.resposta_correta;
+
+      // 3. Chamamos a API para gravar no banco
+      try {
+        await fetch('/api/respostas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questaoId: questao.id,
+            opcaoEscolhida: label,
+            acertou: acertou
+          }),
+        });
+        
+        // Opcional: Console log para você debugar no terminal do navegador
+        console.log("Resposta salva no banco com sucesso!");
+      } catch (error) {
+        console.error("Erro ao salvar no banco:", error);
+      }
     }
   };
-
-      // Exemplo da lógica dentro do componente
-    const salvarResposta = async (opcao: string, correta: boolean) => {
-      await fetch('/api/respostas', {
-        method: 'POST',
-        body: JSON.stringify({
-          questaoId: questao.id,
-          opcaoEscolhida: opcao,
-          acertou: correta
-        }),
-      });
-    };
+ 
 
   return (
     <section className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden mb-8">
