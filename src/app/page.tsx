@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
-  const [stats, setStats] = useState({ total: 0, acertos: 0, taxa: 0 });
+  const [stats, setStats] = useState({ total: 0, acertos: 0, taxa: 0, hoje: 0 });
 
   useEffect(() => {
     if (session) {
@@ -29,6 +29,8 @@ export default function Dashboard() {
 
   const isPro = stats.taxa >= 70;
   const firstName = session?.user?.name ? session.user.name.split(' ')[0] : 'Estudante';
+
+  const DAILY_GOAL = 20; // Sua meta como engenheiro focado
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans w-full overflow-x-hidden">
@@ -67,7 +69,13 @@ export default function Dashboard() {
                 isTrendPositive={isPro} 
               />
             </div>
-            <StatCard icon={<Award className="text-indigo-500"/>} label="QUESTÕES TOTAL" value={stats.total} trend="No teu histórico" />
+            <StatCard 
+              icon={<Award className="text-indigo-500"/>} 
+              label="META DO DIA" 
+              value={`${stats.hoje}/${DAILY_GOAL}`} 
+              trend={stats.hoje >= DAILY_GOAL ? "Meta batida! 🔥" : `Faltam ${DAILY_GOAL - stats.hoje} questões`} 
+              isTrendPositive={stats.hoje >= DAILY_GOAL}
+            />
             <StatCard icon={<Flame className="text-orange-500"/>} label="DIAS SEGUIDOS" value="1" trend="Começa a tua sequência!" />
           </div>
 
