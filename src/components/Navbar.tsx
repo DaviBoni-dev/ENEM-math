@@ -20,7 +20,7 @@ export default function Navbar() {
       {/* Centro: Links de Navegação */}
       <div className="flex gap-8 text-sm font-medium text-slate-600">
         <Link href="/" className="hover:text-indigo-600 transition-colors">Dashboard</Link>
-        <Link href="/provas" className="hover:text-indigo-600 transition-colors">Provas</Link>
+        <Link href="/praticar" className="hover:text-indigo-600 transition-colors">Praticar</Link>
         <Link href="/temas" className="hover:text-indigo-600 transition-colors">Aprender</Link>
       </div>
 

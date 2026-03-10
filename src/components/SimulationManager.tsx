@@ -61,21 +61,38 @@ export default function SimulationManager({ questoes, modo }: { questoes: any[],
         <h2 className="text-3xl font-black text-slate-900">Simulado Finalizado!</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 bg-slate-50 rounded-2xl text-center">
-            <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
-            <span className="block text-2xl font-black">{acertos}/{questoes.length}</span>
-            <span className="text-xs font-bold text-slate-400 uppercase">Acertos</span>
-          </div>
-          <div className="p-6 bg-slate-50 rounded-2xl text-center">
-            <Clock className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-            <span className="block text-2xl font-black">{tempoMedio} min</span>
-            <span className="text-xs font-bold text-slate-400 uppercase">Por Questão</span>
-          </div>
-          <div className="p-6 bg-indigo-600 rounded-2xl text-white text-center">
-            <span className="block text-3xl font-black">{precisao}%</span>
-            <span className="text-xs font-bold text-indigo-200 uppercase tracking-widest">Precisão</span>
-          </div>
+        {/* Card de Acertos */}
+        <div className="p-6 bg-slate-50 rounded-2xl text-center flex flex-col justify-center min-h-[120px]">
+          <CheckCircle className="w-5 h-5 text-emerald-500 mx-auto mb-3" />
+          <span className="block text-3xl font-black text-slate-900 leading-none">
+            {acertos}/{questoes.length}
+          </span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+            Acertos
+          </span>
         </div>
+
+        {/* Card de Tempo */}
+        <div className="p-6 bg-slate-50 rounded-2xl text-center flex flex-col justify-center min-h-[120px]">
+          <Clock className="w-5 h-5 text-blue-500 mx-auto mb-3" />
+          <span className="block text-3xl font-black text-slate-900 leading-none">
+            {tempoMedio} min
+          </span>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+            Por Questão
+          </span>
+        </div>
+
+        {/* Card de Precisão (Destaque) */}
+        <div className="p-6 bg-indigo-600 rounded-2xl text-white text-center flex flex-col justify-center min-h-[120px] shadow-lg shadow-indigo-100">
+          <span className="block text-4xl font-black leading-none">
+            {precisao}%
+          </span>
+          <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mt-3">
+            Precisão
+          </span>
+        </div>
+      </div>
 
         <button 
           onClick={() => setVerAnalise(true)}

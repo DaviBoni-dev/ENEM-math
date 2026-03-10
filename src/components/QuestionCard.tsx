@@ -116,7 +116,7 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
       className={`flex items-center w-full p-4 text-left border rounded-xl transition-all ${bgColor}`}
     >
       <span className={`w-8 h-8 flex items-center justify-center rounded-lg mr-4 font-bold ${
-        (revelar && isCorrect) || (!revelar && isSelected) ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'
+        (revelar && isCorrect) || (!revelar && isSelected) ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700'
       } ${revelar && isCorrect ? 'bg-green-500' : ''}`}>
         {alt.label}
       </span>
@@ -134,7 +134,7 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
               ? "✅ Resposta correta!" 
               : `❌ Incorreto. A resposta certa era a letra ${questao.resposta_correta}.`}
             <button 
-              onClick={() => { setRevelar(false); setRespostaSelecionada(null); }}
+              onClick={() => { setRevelarLocal(false); setRespostaSelecionada(null); }}
               className="block mx-auto mt-2 text-sm underline opacity-70"
             >
               Tentar novamente
