@@ -1,24 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Clock, Pause, Play, RotateCcw } from 'lucide-react';
 
-export default function Timer() {
-  const [seconds, setSeconds] = useState(0);
-  const [isActive, setIsActive] = useState(true);
+interface TimerProps {
+  seconds: number;
+  isActive: boolean;
+  setIsActive: (active: boolean) => void;
+  resetTimer: () => void;
+}
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (isActive) {
-      interval = setInterval(() => {
-        setSeconds((prev) => prev + 1);
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isActive]);
-
+export default function Timer({ seconds, isActive, setIsActive, resetTimer }: TimerProps) {
   const formatTime = (totalSeconds: number) => {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -44,14 +35,12 @@ export default function Timer() {
           <button 
             onClick={() => setIsActive(!isActive)}
             className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-            title={isActive ? "Pausar" : "Retomar"}
           >
             {isActive ? <Pause className="w-5 h-5 text-slate-600" /> : <Play className="w-5 h-5 text-indigo-600" />}
           </button>
           <button 
-            onClick={() => { setSeconds(0); setIsActive(false); }}
+            onClick={resetTimer}
             className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
-            title="Reiniciar"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
