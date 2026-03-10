@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useEffect } from 'react';
 
 interface QuestaoProps {
   questao: {
@@ -17,12 +18,21 @@ interface QuestaoProps {
     ano_enem :string;
     tema: string;
   };
+  valorInicial?: string | null;
+  onSelect?: (label: string) => void;
+  revelarExterno?: boolean;
   modo?: string;
 }
 
-export default function QuestionCard({ questao, modo }: QuestaoProps) {
-  const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(null);
-  const [revelar, setRevelar] = useState(false);
+export default function QuestionCard({ questao, modo, onSelect, revelarExterno, valorInicial }: QuestaoProps) {
+  const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(valorInicial || null);
+  const [revelarLocal, setRevelarLocal] = useState(false);
+
+  useEffect(() => {
+    if (valorInicial) setRespostaSelecionada(valorInicial);
+  }, [valorInicial]);
+
+  const revelar = revelarExterno || revelarLocal;
 
   const alternativas = [
     { label: 'A', text: questao.alternativa_a },
@@ -35,9 +45,10 @@ export default function QuestionCard({ questao, modo }: QuestaoProps) {
   const handleClique = async (label: string) => {
     if (!revelar) {
       setRespostaSelecionada(label);
+      if(onSelect) onSelect(label);
       
       if(modo != 'simulado')
-      setRevelar(true);
+       setRevelarLocal(true);
 
       // 2. Calculamos o acerto na hora
       const acertou = label === questao.resposta_correta;
