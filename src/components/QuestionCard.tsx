@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { useEffect } from 'react';
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
+import MathText from './MathText';
 
 interface QuestaoProps {
   questao: {
@@ -14,7 +17,7 @@ interface QuestaoProps {
     alternativa_d: string;
     alternativa_e: string;
     resposta_correta: string;
-    url_imagem_principal: string | null;
+    urls_imagens: string[] | null;
     ano_enem :string;
     tema: string;
   };
@@ -81,15 +84,28 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
           ENEM {questao.ano_enem}
         </span>
 
-        <div className="mt-4 text-gray-800 whitespace-pre-wrap">{questao.enunciado}</div>
+        <div className="mt-4 text-gray-800 whitespace-pre-wrap">
+  <MathText text={questao.enunciado} />
+</div>
 
-        {questao.url_imagem_principal && (
-          <div className="my-6 flex justify-center bg-gray-50 p-4 rounded-lg">
-            <img src={questao.url_imagem_principal} alt="Questão" className="max-h-80 object-contain" />
+        {/* RENDERIZAÇÃO DE MÚLTIPLAS IMAGENS */}
+        {questao.urls_imagens && questao.urls_imagens.length > 0 && (
+          <div className="my-6 space-y-4"> 
+            {questao.urls_imagens.map((url, index) => (
+              <div key={index} className="flex justify-center bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <img 
+                  src={url} 
+                  alt={`Imagem ${index + 1} da questão`} 
+                  className="max-h-80 object-contain shadow-sm" 
+                />
+              </div>
+            ))}
           </div>
         )}
 
-        <p className="font-bold text-gray-900 mt-4 mb-6">{questao.comando}</p>
+        <p className="font-bold text-gray-900 mt-4 mb-6">
+  <MathText text={questao.comando} />
+</p>
 
         <div className="grid gap-3">
           {alternativas.map((alt) => {
@@ -120,7 +136,9 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
       } ${revelar && isCorrect ? 'bg-green-500' : ''}`}>
         {alt.label}
       </span>
-      <span className="flex-1">{alt.text}</span>
+     <span className="flex-1">
+  <MathText text={alt.text} />
+</span>
     </button>
   );
 })}
