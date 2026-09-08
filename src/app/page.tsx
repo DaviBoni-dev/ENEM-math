@@ -11,9 +11,42 @@ interface TopicoStats {
   precisao: number;
 }
 
+interface SimuladoRecente {
+  id: number;
+  ano_enem: string;
+  total_questoes: number;
+  total_acertos: number;
+  tempo_segundos: number;
+  precisao: number;
+  criado_em: string;
+}
+
+function getNextEnemDate() {
+  const now = new Date();
+  let targetYear = now.getFullYear();
+  let enemDate = new Date(targetYear, 10, 8); // 8 de Novembro
+
+  if (now > enemDate) {
+    targetYear += 1;
+    enemDate = new Date(targetYear, 10, 8);
+  }
+
+  const diffMs = enemDate.getTime() - now.getTime();
+  const diffDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+  const diffMonths = Math.floor(diffDays / 30);
+
+  return {
+    year: targetYear,
+    days: diffDays,
+    months: diffMonths,
+  };
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
-  const [stats, setStats] = useState({ total: 0, acertos: 0, taxa: 0, hoje: 0 });
+  const [stats, setStats] = useState({ total: 0, acertos: 0, taxa: 0, hoje: 0, streak: 0 });
+  const [topicos, setTopicos] = useState<TopicoStats[]>([]);
+  const [simuladosRecentes, setSimuladosRecentes] = useState<SimuladoRecente[]>([]);
 
   useEffect(() => {
     if (session) {
@@ -21,23 +54,25 @@ export default function Dashboard() {
         .then(res => res.json())
         .then(data => setStats(data))
         .catch(err => console.error("Erro ao carregar stats", err));
+
+      fetch('/api/user/stats-by-topic')
+        .then(res => res.json())
+        .then(data => setTopicos(Array.isArray(data) ? data : []))
+        .catch(err => console.error("Erro ao carregar tópicos", err));
+
+      fetch('/api/user/simulados-recentes')
+        .then(res => res.json())
+        .then(data => setSimuladosRecentes(Array.isArray(data) ? data : []))
+        .catch(err => console.error("Erro ao carregar simulados recentes", err));
     }
   }, [session]);
 
-  const [topicos, setTopicos] = useState<TopicoStats[]>([]);
-
-    useEffect(() => {
-      if (session) {
-        fetch('/api/user/stats-by-topic')
-          .then(res => res.json())
-          .then(data => setTopicos(data));
-      }
-    }, [session]);
-
   const isPro = stats.taxa >= 70;
   const firstName = session?.user?.name ? session.user.name.split(' ')[0] : 'Estudante';
+  const latestYear = simuladosRecentes.length > 0 ? simuladosRecentes[0].ano_enem : null;
+  const countdown = getNextEnemDate();
 
-  const DAILY_GOAL = 20; // Sua meta como engenheiro focado
+  const DAILY_GOAL = 20;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans w-full overflow-x-hidden">
@@ -58,9 +93,9 @@ export default function Dashboard() {
               </p>
             </div>
             
-            <Link href="/provas/2023">
+            <Link href={latestYear ? `/provas/${latestYear}` : "/provas"}>
               <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg hover:scale-105">
-                <Play className="w-4 h-4 fill-current" /> Continuar Simulado
+                <Play className="w-4 h-4 fill-current" /> {latestYear ? `Continuar ENEM ${latestYear}` : "Iniciar Simulado"}
               </button>
             </Link>
           </div>
@@ -72,7 +107,7 @@ export default function Dashboard() {
                 icon={<Target className={isPro ? "text-amber-500" : "text-emerald-500"}/>} 
                 label={isPro ? "PRECISÃO NÍVEL PRO" : "PRECISÃO GERAL"} 
                 value={`${stats.taxa}%`} 
-                trend={`${stats.acertos} acertos`} 
+                trend={`${stats.acertos} acertos no total`} 
                 isTrendPositive={isPro} 
               />
             </div>
@@ -83,7 +118,19 @@ export default function Dashboard() {
               trend={stats.hoje >= DAILY_GOAL ? "Meta batida! 🔥" : `Faltam ${DAILY_GOAL - stats.hoje} questões`} 
               isTrendPositive={stats.hoje >= DAILY_GOAL}
             />
-            <StatCard icon={<Flame className="text-orange-500"/>} label="DIAS SEGUIDOS" value="1" trend="Começa a tua sequência!" />
+            <StatCard 
+              icon={<Flame className="text-orange-500"/>} 
+              label="DIAS SEGUIDOS" 
+              value={`${stats.streak || 0}`} 
+              trend={
+                (stats.streak || 0) === 0 
+                  ? "Comece sua sequência hoje!" 
+                  : (stats.streak || 0) === 1 
+                  ? "Primeiro dia! Continue firme." 
+                  : "Sequência em chamas! 🔥"
+              } 
+              isTrendPositive={(stats.streak || 0) > 0}
+            />
           </div>
 
           {/* Seção de Provas (Praticar) */}
@@ -94,24 +141,41 @@ export default function Dashboard() {
               </h3>
               <Link href="/provas" className="text-indigo-600 font-semibold text-sm hover:underline">Ver todas as provas</Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ActionCard 
-                title="ENEM 2023" 
-                subtitle="Matemática e suas Tecnologias" 
-                progress={75} 
-                color="bg-indigo-600"
-                footerText="Próxima meta: Logaritmos"
-                href="/provas/2023"
-              />
-              <ActionCard 
-                title="ENEM 2022" 
-                subtitle="Matemática e suas Tecnologias" 
-                progress={20} 
-                color="bg-sky-500"
-                footerText="Aguardando início"
-                href="/provas/2022"
-              />
-            </div>
+
+            {simuladosRecentes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {simuladosRecentes.slice(0, 2).map((sim) => {
+                  const minutos = Math.max(1, Math.round(sim.tempo_segundos / 60));
+                  const cor = sim.precisao >= 70 ? 'bg-emerald-600' : sim.precisao >= 50 ? 'bg-indigo-600' : 'bg-amber-500';
+                  const dataFormatada = new Date(sim.criado_em).toLocaleDateString('pt-BR');
+                  return (
+                    <ActionCard 
+                      key={sim.id}
+                      title={`ENEM ${sim.ano_enem}`} 
+                      subtitle={`${sim.total_acertos} acertos de ${sim.total_questoes} questões`} 
+                      progress={sim.precisao} 
+                      color={cor}
+                      footerText={`Tempo: ${minutos} min • ${dataFormatada}`}
+                      href={`/provas/${sim.ano_enem}`}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                  <h4 className="font-bold text-slate-800 text-lg">Nenhum simulado finalizado ainda</h4>
+                  <p className="text-slate-400 text-sm mt-1">
+                    Pratique provas anteriores do ENEM no modo simulado ou livre para acompanhar sua evolução aqui.
+                  </p>
+                </div>
+                <Link href="/provas">
+                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all whitespace-nowrap shadow-md">
+                    Escolher Prova
+                  </button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Seção de Temas (Aprender) */}
@@ -158,12 +222,14 @@ export default function Dashboard() {
           {/* Desafio do Dia */}
           <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-3xl text-white relative overflow-hidden">
             <div className="relative z-10">
-              <span className="bg-white/20 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Desafio Diário</span>
-              <h4 className="text-xl font-bold mt-4 mb-2">Questão do Dia</h4>
-              <p className="text-indigo-100 text-xs mb-6">Resolva uma questão de Geometria Espacial para manter seu streak.</p>
-              <button className="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold text-sm hover:scale-105 transition-all">
-                Resolver Agora
-              </button>
+              <span className="bg-white/20 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Desafio Rápido</span>
+              <h4 className="text-xl font-bold mt-4 mb-2">Treino Aleatório</h4>
+              <p className="text-indigo-100 text-xs mb-6">Resolva 10 questões variadas do banco para aquecer e manter o seu streak ativo.</p>
+              <Link href="/praticar/aleatorio" className="block">
+                <button className="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold text-sm hover:scale-105 transition-all">
+                  Resolver Agora
+                </button>
+              </Link>
             </div>
             <Award className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10" />
           </div>
@@ -180,8 +246,10 @@ export default function Dashboard() {
                   <span className="text-lg font-black">08</span>
                 </div>
                 <div>
-                  <p className="text-sm font-bold">ENEM 2026 - Dia 1</p>
-                  <p className="text-[10px] text-slate-400">Faltam 8 meses</p>
+                  <p className="text-sm font-bold">ENEM {countdown.year} - Dia 1</p>
+                  <p className="text-[10px] text-slate-400">
+                    {countdown.months > 1 ? `Faltam aproximadamente ${countdown.months} meses` : `Faltam ${countdown.days} dias`}
+                  </p>
                 </div>
               </div>
             </div>
