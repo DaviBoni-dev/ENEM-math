@@ -56,11 +56,12 @@ export default function SimulationManager({ questoes, modo }: SimulationManagerP
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ano: questoes[0].ano_enem,
+          ano: questoes[0]?.ano_enem || 'Geral',
           total: questoes.length,
           acertos: acertos,
           tempo: seconds, 
-          respostas: respostas
+          respostas: respostas,
+          modo: modo
         }),
       });
     } catch (err) {

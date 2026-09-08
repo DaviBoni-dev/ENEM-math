@@ -43,30 +43,28 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
   const handleClique = async (label: string) => {
     if (!revelar) {
       setRespostaLocal(label);
-      if(onSelect) onSelect(label);
+      if (onSelect) onSelect(label);
       
-      if(modo != 'simulado')
-       setRevelarLocal(true);
+      // No modo simulado, o usuário pode alterar sua escolha e as respostas serão gravadas em lote ao finalizar.
+      // Gravamos imediatamente no banco apenas no modo livre ou prática avulsa.
+      if (modo !== 'simulado') {
+        setRevelarLocal(true);
 
-      // 2. Calculamos o acerto na hora
-      const acertou = label === questao.resposta_correta;
+        const acertou = label === questao.resposta_correta;
 
-      // 3. Chamamos a API para gravar no banco
-      try {
-        await fetch('/api/respostas', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            questaoId: questao.id,
-            opcaoEscolhida: label,
-            acertou: acertou
-          }),
-        });
-        
-        // Opcional: Console log para você debugar no terminal do navegador
-        console.log("Resposta salva no banco com sucesso!");
-      } catch (error) {
-        console.error("Erro ao salvar no banco:", error);
+        try {
+          await fetch('/api/respostas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              questaoId: questao.id,
+              opcaoEscolhida: label,
+              acertou: acertou
+            }),
+          });
+        } catch (error) {
+          console.error("Erro ao salvar no banco:", error);
+        }
       }
     }
   };
