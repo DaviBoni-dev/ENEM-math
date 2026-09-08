@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!session || !session.user) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   try {
     const { ano, total, acertos, tempo, respostas } = await request.json();

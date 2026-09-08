@@ -40,6 +40,7 @@ export default function Navbar() {
             <div className="w-10 h-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm overflow-hidden">
               <img 
                 src={session?.user?.image || "/avatar.jpg"}
+                alt="Foto de perfil"
               />
             </div>
             

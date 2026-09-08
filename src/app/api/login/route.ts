@@ -22,8 +22,7 @@ export async function POST(request: Request) {
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha_hash);
 
     if (senhaCorreta) {
-      // Removemos a senha do objeto antes de enviar para o front
-      const { senha: _, ...userSemSenha } = usuario;
+      const userSemSenha = { id: usuario.id, nome: usuario.nome, email: usuario.email };
       return NextResponse.json({ message: 'Login realizado!', user: userSemSenha });
     } else {
       return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 });

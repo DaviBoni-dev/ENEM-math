@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useEffect } from 'react';
 import 'katex/dist/katex.min.css';
-import { InlineMath } from 'react-katex';
 import MathText from './MathText';
 
 interface QuestaoProps {
@@ -28,13 +26,10 @@ interface QuestaoProps {
 }
 
 export default function QuestionCard({ questao, modo, onSelect, revelarExterno, valorInicial }: QuestaoProps) {
-  const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(valorInicial || null);
+  const [respostaLocal, setRespostaLocal] = useState<string | null>(null);
   const [revelarLocal, setRevelarLocal] = useState(false);
 
-  useEffect(() => {
-    if (valorInicial) setRespostaSelecionada(valorInicial);
-  }, [valorInicial]);
-
+  const respostaSelecionada = valorInicial !== undefined ? valorInicial : respostaLocal;
   const revelar = revelarExterno || revelarLocal;
 
   const alternativas = [
@@ -47,7 +42,7 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
 
   const handleClique = async (label: string) => {
     if (!revelar) {
-      setRespostaSelecionada(label);
+      setRespostaLocal(label);
       if(onSelect) onSelect(label);
       
       if(modo != 'simulado')
@@ -152,7 +147,7 @@ export default function QuestionCard({ questao, modo, onSelect, revelarExterno, 
               ? "✅ Resposta correta!" 
               : `❌ Incorreto. A resposta certa era a letra ${questao.resposta_correta}.`}
             <button 
-              onClick={() => { setRevelarLocal(false); setRespostaSelecionada(null); }}
+              onClick={() => { setRevelarLocal(false); setRespostaLocal(null); onSelect?.(''); }}
               className="block mx-auto mt-2 text-sm underline opacity-70"
             >
               Tentar novamente

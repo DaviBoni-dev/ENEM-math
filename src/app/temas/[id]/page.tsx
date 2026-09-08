@@ -2,6 +2,8 @@ import { query } from '@/lib/db';
 import QuestionCard from '@/components/QuestionCard';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 // 1. Note que agora tipamos o params como uma Promise
 export default async function FilteredQuestionsPage({ 
   params 
@@ -12,15 +14,21 @@ export default async function FilteredQuestionsPage({
   // 2. Aqui está o segredo: precisamos dar await no params antes de usar
   const { id } = await params;
 
-  // 3. Agora usamos a variável 'id' (já resolvida) nas queries
-  const themeInfo = await query('SELECT nome FROM temas WHERE id = $1', [id]);
-  const questionsResult = await query(
-    'SELECT * FROM questoes WHERE tema_id = $1 ORDER BY ano_enem DESC',
-    [id]
-  );
+  let temaNome = "Tema não encontrado";
+  let questoes = [];
 
-  const temaNome = themeInfo.rows[0]?.nome || "Tema não encontrado";
-  const questoes = questionsResult.rows;
+  try {
+    const themeInfo = await query('SELECT nome FROM temas WHERE id = $1', [id]);
+    const questionsResult = await query(
+      'SELECT * FROM questoes WHERE tema_id = $1 ORDER BY ano_enem DESC',
+      [id]
+    );
+
+    temaNome = themeInfo.rows[0]?.nome || "Tema não encontrado";
+    questoes = questionsResult.rows;
+  } catch (error) {
+    console.error('Erro ao carregar questões por tema:', error);
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 p-8">

@@ -1,8 +1,15 @@
 'use client'
-import { Search, Bell, Flame, Star, Clock, Play, BookOpen, Target, Award, Calendar } from 'lucide-react';
+import { Flame, Play, BookOpen, Target, Award, Calendar } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from "react";
 import Link from 'next/link';
+
+interface TopicoStats {
+  tema: string;
+  total: number;
+  acertos: number;
+  precisao: number;
+}
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -17,7 +24,7 @@ export default function Dashboard() {
     }
   }, [session]);
 
-  const [topicos, setTopicos] = useState([]);
+  const [topicos, setTopicos] = useState<TopicoStats[]>([]);
 
     useEffect(() => {
       if (session) {
@@ -116,7 +123,7 @@ export default function Dashboard() {
   </div>
   
   <div className="space-y-4">
-    {topicos.length > 0 ? topicos.map((topico: any) => (
+    {topicos.length > 0 ? topicos.map((topico) => (
       <div key={topico.tema} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-200 transition-all">
          <div className="flex gap-4 items-center">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold ${
@@ -187,7 +194,15 @@ export default function Dashboard() {
 
 // --- SUB-COMPONENTES ---
 
-function StatCard({ icon, label, value, trend, isTrendPositive = false }: any) {
+interface StatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend: string;
+  isTrendPositive?: boolean;
+}
+
+function StatCard({ icon, label, value, trend, isTrendPositive = false }: StatCardProps) {
   return (
     <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
       <div className="flex justify-between items-start mb-4">
@@ -202,7 +217,16 @@ function StatCard({ icon, label, value, trend, isTrendPositive = false }: any) {
   );
 }
 
-function ActionCard({ title, subtitle, progress, color, footerText, href }: any) {
+interface ActionCardProps {
+  title: string;
+  subtitle: string;
+  progress: number;
+  color: string;
+  footerText: string;
+  href: string;
+}
+
+function ActionCard({ title, subtitle, progress, color, footerText, href }: ActionCardProps) {
   return (
     <Link href={href}>
       <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm group hover:border-indigo-200 transition-all cursor-pointer">

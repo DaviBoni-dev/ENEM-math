@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Play, Zap, ShieldAlert, X } from 'lucide-react';
+import { Zap, ShieldAlert, X } from 'lucide-react';
 
 export default function ProvasPage() {
   const [anos, setAnos] = useState<{ano_enem: string}[]>([]);

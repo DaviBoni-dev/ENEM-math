@@ -1,9 +1,16 @@
 import { query } from '@/lib/db';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ThemesPage() {
-  const result = await query('SELECT * FROM temas ORDER BY nome ASC');
-  const temas = result.rows;
+  let temas: { id: number | string; nome: string; area_geral: string }[] = [];
+  try {
+    const result = await query('SELECT * FROM temas ORDER BY nome ASC');
+    temas = result.rows;
+  } catch (error) {
+    console.error('Erro ao carregar temas do banco:', error);
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 p-8">

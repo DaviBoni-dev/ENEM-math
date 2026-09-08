@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Off" }, { status: 401 });
+  if (!session || !session.user) return NextResponse.json({ error: "Off" }, { status: 401 });
 
   try {
     // Engenharia: Unimos o histórico com a tabela de questões para saber o tema
@@ -25,6 +25,7 @@ export async function GET() {
 
     return NextResponse.json(result.rows);
   } catch (error) {
+    console.error("Erro ao processar temas:", error);
     return NextResponse.json({ error: "Erro ao processar temas" }, { status: 500 });
   }
 }

@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async session({ session, token }) {
+    async session({ session }) {
       const result = await query("SELECT id FROM usuarios WHERE email = $1", [session.user?.email]);
       if (result.rows[0]) {
         session.user.id = result.rows[0].id;

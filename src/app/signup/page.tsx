@@ -66,7 +66,15 @@ export default function SignupPage() {
   );
 }
 
-function Input({ icon, label, type = "text", placeholder, onChange }: any) {
+interface InputProps {
+  icon: React.ReactNode;
+  label: string;
+  type?: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}
+
+function Input({ icon, label, type = "text", placeholder, onChange }: InputProps) {
   return (
     <div>
       <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">{label}</label>

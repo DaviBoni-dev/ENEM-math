@@ -5,7 +5,27 @@ import QuestionCard from './QuestionCard';
 import Timer from './Timer';
 import { CheckCircle, Clock, BarChart3, ArrowRight } from 'lucide-react';
 
-export default function SimulationManager({ questoes, modo }: { questoes: any[], modo: string }) {
+interface Questao {
+  id: number;
+  enunciado: string;
+  comando: string;
+  alternativa_a: string;
+  alternativa_b: string;
+  alternativa_c: string;
+  alternativa_d: string;
+  alternativa_e: string;
+  resposta_correta: string;
+  urls_imagens: string[] | null;
+  ano_enem: string;
+  tema: string;
+}
+
+interface SimulationManagerProps {
+  questoes: Questao[];
+  modo: string;
+}
+
+export default function SimulationManager({ questoes, modo }: SimulationManagerProps) {
   const [respostas, setRespostas] = useState<{ [key: number]: string }>({});
   const [finalizado, setFinalizado] = useState(false);
   const [verAnalise, setVerAnalise] = useState(false);
@@ -15,13 +35,15 @@ export default function SimulationManager({ questoes, modo }: { questoes: any[],
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isActive && !finalizado) {
       interval = setInterval(() => {
         setSeconds((prev) => prev + 1);
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isActive, finalizado]);
 
   const finalizar = async () => {

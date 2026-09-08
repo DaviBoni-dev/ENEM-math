@@ -4,6 +4,8 @@ import { ArrowLeft, BookOpen } from 'lucide-react';
 import SimuladoBehavior from '@/components/SimuladoBehavior';
 import SimulationManager from '@/components/SimulationManager'; // 1. Importe o Manager que criamos
 
+export const dynamic = 'force-dynamic';
+
 export default async function ExamYearPage({ 
   params,
   searchParams 
@@ -14,12 +16,17 @@ export default async function ExamYearPage({
   const { ano } = await params;
   const { modo = 'livre' } = await searchParams;
 
-  // Busca as questões do banco no Ubuntu
-  const result = await query(
-    'SELECT * FROM questoes WHERE ano_enem = $1 AND disciplina = $2 ORDER BY id ASC',
-    [ano, 'matematica']
-  );
-  const questoes = result.rows;
+  let questoes = [];
+  try {
+    // Busca as questões do banco no Ubuntu
+    const result = await query(
+      'SELECT * FROM questoes WHERE ano_enem = $1 AND disciplina = $2 ORDER BY id ASC',
+      [ano, 'matematica']
+    );
+    questoes = result.rows;
+  } catch (error) {
+    console.error(`Erro ao buscar questões de ${ano}:`, error);
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 py-12 px-4">

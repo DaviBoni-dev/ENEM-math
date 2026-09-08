@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Off" }, { status: 401 });
+  if (!session || !session.user) return NextResponse.json({ error: "Off" }, { status: 401 });
 
   try {
     const result = await query(
@@ -25,6 +25,7 @@ export async function GET() {
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {
+    console.error("Erro ao carregar estatísticas do usuário:", error);
     return NextResponse.json({ error: "Erro" }, { status: 500 });
   }
 }
